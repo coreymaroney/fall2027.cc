@@ -187,20 +187,20 @@ $(document).ready(function () {
             title: "Corey and Carina's Wedding",
 
             // Event start date
-            start: new Date('Sept 11, 2027 3:00'),
+            start: new Date('Sept 11, 2027 15:00'),
 
             // Event duration (IN MINUTES)
             // duration: 120,
 
             // You can also choose to set an end time
             // If an end time is set, this will take precedence over duration
-            end: new Date('Sept 12, 2027 12:00'),
+            end: new Date('Sept 12, 2027 22:00'),
 
             // Event Address
             address: '536 N. Quidnessett Rd, North Kingstown, RI 02852, USA',
 
             // Event Description
-            description: "We can't wait to see you on our big day. For any queries or issues, please contact Corey @ (401)219-6319."
+            description: "We can't wait to see you! If you have any questions, reach out to Corey @ (401) 219-6319."
         }
     });
 
