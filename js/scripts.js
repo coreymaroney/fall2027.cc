@@ -213,7 +213,7 @@ $(document).ready(function () {
         'b0e53b10c1f55ede516b240036b88f40': {singleInvitee: true},
         'aa3f1b9374b921839be33e33cf44f4cd': {singleInvitee: false}
     };
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyOU2I9ITql0ewtYT554ExhtlmSDzFuUxyAAse2PfV-I0SROyduec-924l1YPgGnd99Cw/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxY-LgU_ufyHNdEiiXhWvW0ZcCzkGfQ8g-RQaas7Ubacoo5k84U9-TNdZ2gY3YP3lFUw/exec';
     var MAX_SUGGESTIONS = 8;
 
     var rsvpState = {code: null, config: null, selection: null, attendance: [], submitting: false, session: 0};
@@ -559,9 +559,10 @@ $(document).ready(function () {
 
         setSubmitting(true);
         $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
-
+        console.log("setSubmitting called with", RSVP_ENDPOINT, payload, response);
         $.post(RSVP_ENDPOINT, payload)
             .done(function (response) {
+                console.log("post.done with", RSVP_ENDPOINT, payload, response);
                 if (session !== rsvpState.session) {
                     return;
                 }
@@ -574,7 +575,8 @@ $(document).ready(function () {
                 showCodeStage();
                 $('#rsvp-modal').modal('show');
             })
-            .fail(function () {
+            .fail(function (e) {
+                console.log("post.fail with", e);
                 if (session !== rsvpState.session) {
                     return;
                 }
