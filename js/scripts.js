@@ -208,49 +208,476 @@ $(document).ready(function () {
 
 
     /********************** RSVP **********************/
-    $('#rsvp-form').on('submit', function (e) {
-        console.log("e", e)
-        e.preventDefault();
-        var data = $(this).serialize();
+    // Keyed by MD5 of the invite code: 271117 (single invitee), 74774 (whole party)
+    var RSVP_CODES = {
+        'b0e53b10c1f55ede516b240036b88f40': {singleInvitee: true},
+        'aa3f1b9374b921839be33e33cf44f4cd': {singleInvitee: false}
+    };
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxu2S2_nZexp0vlnK_MWFQSdT5sg6wgMWgU6Qaf9VMakNfzwAwUgSUs3VavUGTxuOWBPg/exec';
+    var MAX_SUGGESTIONS = 8;
 
-        $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
+    var rsvpState = {code: null, config: null, selection: null, attendance: [], submitting: false, session: 0};
+    var guestIndex = null;
+    var guestIndexRequest = null;
+    var suggestions = [];
+    var activeSuggestion = -1;
 
-        if (MD5($('#invite_code').val()) !== 'b0e53b10c1f55ede516b240036b88f40'
-            && MD5($('#invite_code').val()) !== '2ac7f43695eb0479d5846bb38eec59cc') {
-            $('#alert-wrapper').html(alert_markup('danger', '<strong>Sorry!</strong> Your invite code is incorrect.'));
-        } else {
-            $.post('https://script.google.com/macros/s/AKfycbxu2S2_nZexp0vlnK_MWFQSdT5sg6wgMWgU6Qaf9VMakNfzwAwUgSUs3VavUGTxuOWBPg/exec', data)
-                .done(function (data) {
-                    console.log(data);
-                    if (data.result === "error") {
-                        $('#alert-wrapper').html(alert_markup('danger', data.message));
-                    } else {
-                        $('#alert-wrapper').html('');
-                        $('#rsvp-modal').modal('show');
+    /* ---- Guest list loading ---- */
+    function loadGuestIndex() {
+        if (!guestIndexRequest) {
+            var deferred = $.Deferred();
+            $.ajax({url: 'data/output.json', dataType: 'json'})
+                .done(function (rows) {
+                    try {
+                        deferred.resolve(buildGuestIndex(rows));
+                    } catch (err) {
+                        deferred.reject();
                     }
                 })
-                .fail(function (data) {
-                    console.log(data);
-                    $('#alert-wrapper').html(alert_markup('danger', '<strong>Sorry!</strong> There is some issue with the server. '));
+                .fail(function () {
+                    deferred.reject();
                 });
+            // Allow a later retry if loading failed
+            deferred.fail(function () {
+                guestIndexRequest = null;
+            });
+            guestIndexRequest = deferred;
+        }
+        return guestIndexRequest.promise();
+    }
+
+    /* ---- Predictive guest search ---- */
+    var searchInput = $('#guest_search');
+    var suggestionList = $('#guest-suggestions');
+
+    function setSearchMessage(text, isError) {
+        $('#guest-search-message').text(text).toggleClass('text-danger', !!isError);
+    }
+
+    function closeSuggestions() {
+        suggestions = [];
+        activeSuggestion = -1;
+        suggestionList.addClass('hidden').empty();
+        searchInput.attr('aria-expanded', 'false').removeAttr('aria-activedescendant');
+    }
+
+    function highlightSuggestion(index) {
+        var items = suggestionList.children('[role=option]');
+        items.removeClass('active').attr('aria-selected', 'false');
+        activeSuggestion = index;
+        if (index < 0) {
+            searchInput.removeAttr('aria-activedescendant');
+            return;
+        }
+        var item = items.eq(index).addClass('active').attr('aria-selected', 'true');
+        searchInput.attr('aria-activedescendant', item.attr('id'));
+
+        var list = suggestionList[0], el = item[0];
+        if (el.offsetTop < list.scrollTop) {
+            list.scrollTop = el.offsetTop;
+        } else if (el.offsetTop + el.offsetHeight > list.scrollTop + list.clientHeight) {
+            list.scrollTop = el.offsetTop + el.offsetHeight - list.clientHeight;
+        }
+    }
+
+    function updateSuggestions() {
+        var query = searchInput.val();
+        closeSuggestions();
+        if (!guestIndex || !$.trim(query)) {
+            setSearchMessage('');
+            return;
+        }
+        suggestions = searchGuests(guestIndex, query, MAX_SUGGESTIONS);
+        if (!suggestions.length) {
+            setSearchMessage('No guests found. Check the spelling or try just your first name.', true);
+            return;
+        }
+        $.each(suggestions, function (i, option) {
+            $('<li role="option" aria-selected="false"></li>')
+                .attr('id', 'guest-option-' + i)
+                .text(option.label)
+                .appendTo(suggestionList);
+        });
+        suggestionList.removeClass('hidden');
+        searchInput.attr('aria-expanded', 'true');
+        setSearchMessage(suggestions.length + (suggestions.length === 1 ? ' match' : ' matches') +
+            ' found. Choose your name from the list.');
+    }
+
+    function selectGuest(option) {
+        var party = guestIndex.parties[option.partyId];
+        var members = rsvpState.config.singleInvitee
+            ? [{name: option.name}]
+            : party.members.map(function (name) {
+                return {name: name};
+            });
+
+        rsvpState.selection = {partyId: option.partyId, members: members};
+        rsvpState.attendance = members.map(function () {
+            return null;
+        });
+        searchInput.val(option.name);
+        closeSuggestions();
+        setSearchMessage('Selected: ' + option.label + '.');
+        $('#alert-wrapper').html('');
+        renderParty();
+    }
+
+    function clearSelection() {
+        rsvpState.selection = null;
+        rsvpState.attendance = [];
+        $('#party-members').empty();
+        $('#party-section').addClass('hidden');
+    }
+
+    searchInput.on('input', function () {
+        if (rsvpState.selection) {
+            clearSelection();
+        }
+        updateSuggestions();
+    });
+
+    searchInput.on('keydown', function (e) {
+        var open = suggestions.length > 0;
+        switch (e.which) {
+            case 40: // ArrowDown
+                e.preventDefault();
+                if (!open && !rsvpState.selection) {
+                    updateSuggestions();
+                }
+                if (suggestions.length) {
+                    highlightSuggestion((activeSuggestion + 1) % suggestions.length);
+                }
+                break;
+            case 38: // ArrowUp
+                if (open) {
+                    e.preventDefault();
+                    highlightSuggestion(activeSuggestion <= 0 ? suggestions.length - 1 : activeSuggestion - 1);
+                }
+                break;
+            case 13: // Enter
+                if (open) {
+                    e.preventDefault();
+                    if (activeSuggestion >= 0) {
+                        selectGuest(suggestions[activeSuggestion]);
+                    }
+                }
+                break;
+            case 27: // Escape
+                if (open) {
+                    e.preventDefault();
+                    closeSuggestions();
+                }
+                break;
         }
     });
 
+    searchInput.on('blur', closeSuggestions);
+
+    // mousedown would blur the input before the click registers
+    suggestionList.on('mousedown', function (e) {
+        e.preventDefault();
+    });
+    suggestionList.on('click', '[role=option]', function () {
+        var option = suggestions[$(this).index()];
+        if (option) {
+            selectGuest(option);
+        }
+    });
+
+    /* ---- Party attendance ---- */
+    function renderParty() {
+        var container = $('#party-members').empty();
+        $.each(rsvpState.selection.members, function (i, member) {
+            var nameId = 'party-member-' + i;
+            var row = $('<div class="party-member" role="radiogroup"></div>').attr('aria-labelledby', nameId);
+            $('<span class="party-member-name"></span>').attr('id', nameId).text(member.name).appendTo(row);
+            var choices = $('<span class="party-member-choices"></span>').appendTo(row);
+            $.each([[true, 'Will attend'], [false, 'Will not attend']], function (j, choice) {
+                var label = $('<label class="attendance-option"></label>');
+                $('<input type="radio">')
+                    .attr({name: 'attendance-' + i, value: choice[0] ? 'yes' : 'no'})
+                    .data({member: i, attending: choice[0]})
+                    .appendTo(label);
+                label.append(document.createTextNode(' ' + choice[1]));
+                choices.append(label);
+            });
+            container.append(row);
+        });
+        $('#party-section').removeClass('hidden');
+    }
+
+    $('#party-members').on('change', 'input[type=radio]', function () {
+        rsvpState.attendance[$(this).data('member')] = $(this).data('attending');
+        $(this).closest('.party-member').removeClass('attendance-missing').removeAttr('aria-invalid');
+    });
+
+    /* ---- Flow control ---- */
+    function setSubmitting(on) {
+        rsvpState.submitting = on;
+        $('#rsvp-fieldset').prop('disabled', on);
+        $('#rsvp-form').attr('aria-busy', on ? 'true' : 'false');
+        $('#rsvp-submit').text(on ? 'Sending...' : 'Send RSVP');
+    }
+
+    function resetRsvpState() {
+        rsvpState.session++;
+        rsvpState.code = null;
+        rsvpState.config = null;
+        setSubmitting(false);
+        clearSelection();
+        closeSuggestions();
+        $('#rsvp-form')[0].reset();
+        searchInput.prop('disabled', true);
+        setSearchMessage('');
+        $('#alert-wrapper').html('');
+    }
+
+    function showCodeStage() {
+        resetRsvpState();
+        $('#rsvp-form').addClass('hidden');
+        $('#rsvp-code-alert').html('');
+        $('#invite_code').val('').removeAttr('aria-invalid');
+        $('#rsvp-code-form').removeClass('hidden');
+    }
+
+    $('#rsvp-code-form').on('submit', function (e) {
+        e.preventDefault();
+        var code = $.trim($('#invite_code').val());
+        var hash = MD5(code);
+        var config = RSVP_CODES.hasOwnProperty(hash) ? RSVP_CODES[hash] : null;
+
+        if (!config) {
+            $('#rsvp-code-alert').html(alert_markup('danger', '<strong>Sorry!</strong> Your invite code is incorrect.'));
+            $('#invite_code').attr('aria-invalid', 'true').focus();
+            return;
+        }
+
+        resetRsvpState();
+        rsvpState.code = code;
+        rsvpState.config = config;
+        var session = rsvpState.session;
+
+        $('#party-heading').text(config.singleInvitee ? 'Will you be joining us?' : 'Let us know who will be joining us');
+        $('#rsvp-code-alert').html('');
+        $('#invite_code').removeAttr('aria-invalid');
+        $('#rsvp-code-form').addClass('hidden');
+        $('#rsvp-form').removeClass('hidden');
+        setSearchMessage('Loading the guest list...');
+
+        loadGuestIndex()
+            .done(function (index) {
+                if (session !== rsvpState.session) {
+                    return;
+                }
+                guestIndex = index;
+                setSearchMessage('');
+                searchInput.prop('disabled', false).focus();
+            })
+            .fail(function () {
+                if (session !== rsvpState.session) {
+                    return;
+                }
+                setSearchMessage('Sorry, we couldn\'t load the guest list. Please refresh the page and try again.', true);
+            });
+    });
+
+    $('#rsvp-change-code').on('click', function () {
+        showCodeStage();
+        $('#invite_code').focus();
+    });
+
+    /* ---- Submission ---- */
+    function guestSelectionError() {
+        if (!guestIndex) {
+            return 'The guest list hasn\'t loaded yet. Please refresh the page and try again.';
+        }
+        var query = $.trim(searchInput.val());
+        if (!query) {
+            return 'Please search for your name and choose it from the list.';
+        }
+        var key = query.toLowerCase();
+        var exact = $.grep(guestIndex.options, function (option) {
+            return option.key === key;
+        });
+        if (exact.length > 1) {
+            return 'More than one guest is named "' + escape_html(query) + '". Please choose the right one from the suggestions.';
+        }
+        if (!searchGuests(guestIndex, query, 1).length) {
+            return 'No guests found matching "' + escape_html(query) + '".';
+        }
+        return 'Please choose your name from the suggestions.';
+    }
+
+    $('#rsvp-form').on('submit', function (e) {
+        e.preventDefault();
+        if (rsvpState.submitting) {
+            return;
+        }
+        if (!rsvpState.config) {
+            showCodeStage();
+            return;
+        }
+
+        var selection = rsvpState.selection;
+        if (!selection) {
+            $('#alert-wrapper').html(alert_markup('danger', guestSelectionError()));
+            searchInput.focus();
+            return;
+        }
+
+        var rows = $('#party-members .party-member');
+        var missing = [];
+        $.each(selection.members, function (i, member) {
+            var unanswered = rsvpState.attendance[i] !== true && rsvpState.attendance[i] !== false;
+            rows.eq(i).toggleClass('attendance-missing', unanswered).attr('aria-invalid', unanswered ? 'true' : null);
+            if (unanswered) {
+                missing.push(escape_html(member.name));
+            }
+        });
+        if (missing.length) {
+            $('#alert-wrapper').html(alert_markup('danger', 'Please choose <strong>Will attend</strong> or <strong>Will not attend</strong> for: ' + missing.join(', ') + '.'));
+            rows.filter('.attendance-missing').first().find('input').first().focus();
+            return;
+        }
+
+        var partyNames = selection.members.map(function (member) {
+            return member.name;
+        });
+        var responses = rsvpState.attendance.map(function (attending) {
+            return attending ? 'YES' : 'NO';
+        });
+
+        var payload = {
+            email: $.trim($('#rsvp_email').val()),
+            party_names: partyNames.join('\n'),
+            rsvp: responses.join('\n'),
+            invite_code: rsvpState.code,
+            party_id: selection.partyId
+        };
+        var session = rsvpState.session;
+
+        setSubmitting(true);
+        $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
+
+        $.post(RSVP_ENDPOINT, payload)
+            .done(function (response) {
+                if (session !== rsvpState.session) {
+                    return;
+                }
+                setSubmitting(false);
+                if (!response || response.result !== 'success') {
+                    var message = response && response.message ? escape_html(response.message) : '<strong>Sorry!</strong> There is some issue with the server.';
+                    $('#alert-wrapper').html(alert_markup('danger', message));
+                    return;
+                }
+                showCodeStage();
+                $('#rsvp-modal').modal('show');
+            })
+            .fail(function () {
+                if (session !== rsvpState.session) {
+                    return;
+                }
+                setSubmitting(false);
+                $('#alert-wrapper').html(alert_markup('danger', '<strong>Sorry!</strong> There is some issue with the server. Your answers are still here, please try again.'));
+            });
+    });
+
 });
+
+/********************** Guest list **********************/
+
+// Each output.json row is one party; its non-empty values, in column order, are the members
+function buildGuestIndex(rows) {
+    if (!Array.isArray(rows)) {
+        throw new Error('Guest list must be an array');
+    }
+    var parties = {};
+    var options = [];
+    var nameCounts = {};
+
+    rows.forEach(function (row, partyId) {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) {
+            return;
+        }
+        var members = Object.keys(row).map(function (column) {
+            return typeof row[column] === 'string' ? row[column].trim() : '';
+        }).filter(Boolean);
+        if (!members.length) {
+            return;
+        }
+        parties[partyId] = {partyId: partyId, members: members};
+        members.forEach(function (name, memberIndex) {
+            var key = name.toLowerCase();
+            nameCounts[key] = (nameCounts[key] || 0) + 1;
+            options.push({partyId: partyId, memberIndex: memberIndex, name: name, key: key});
+        });
+    });
+
+    if (!options.length) {
+        throw new Error('Guest list is empty');
+    }
+
+    // Shared names are labelled with their party so each option is unambiguous
+    var labelCounts = {};
+    options.forEach(function (option) {
+        option.label = option.name;
+        if (nameCounts[option.key] > 1) {
+            var others = parties[option.partyId].members.filter(function (name, i) {
+                return i !== option.memberIndex;
+            });
+            option.label += others.length ? ' (with ' + others.join(' & ') + ')' : ' (on their own)';
+        }
+        var labelKey = option.label.toLowerCase();
+        labelCounts[labelKey] = (labelCounts[labelKey] || 0) + 1;
+    });
+    options.forEach(function (option) {
+        if (labelCounts[option.label.toLowerCase()] > 1) {
+            option.label += ' - party ' + (option.partyId + 1);
+        }
+    });
+
+    return {parties: parties, options: options};
+}
+
+// Exact matches first, then word-prefix, then substring; dataset order within each group
+function searchGuests(index, query, limit) {
+    var q = String(query).trim().toLowerCase();
+    if (!q) {
+        return [];
+    }
+    var groups = [[], [], []];
+    index.options.forEach(function (option) {
+        var pos = option.key.indexOf(q);
+        if (pos === -1) {
+            return;
+        }
+        if (option.key === q) {
+            groups[0].push(option);
+        } else if (pos === 0 || /\s/.test(option.key.charAt(pos - 1))) {
+            groups[1].push(option);
+        } else {
+            groups[2].push(option);
+        }
+    });
+    // Never hide an exact-name duplicate behind the limit
+    return groups[0].concat(groups[1], groups[2]).slice(0, Math.max(limit, groups[0].length));
+}
 
 /********************** Extras **********************/
 
 // Google map
 function initMap() {
-    var location = {lat: 41.6369746245853, lng: -71.43399731832613};
+    var location = {lat: 41.63716317228391, lng: -71.41553176506918};
+    var house = {lat: 41.6369746245853, lng: -71.43399731832613};
     var map = new google.maps.Map(document.getElementById('map-canvas'), {
         zoom: 15,
         center: location,
-        scrollwheel: false
+        scrollwheel: false,
     });
 
     var marker = new google.maps.Marker({
-        position: location,
+        position: house,
         map: map
     });
 }
@@ -272,6 +699,10 @@ function initBBSRMap() {
 // alert_markup
 function alert_markup(alert_type, msg) {
     return '<div class="alert alert-' + alert_type + '" role="alert">' + msg + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
+}
+
+function escape_html(text) {
+    return $('<div>').text(text).html().replace(/"/g, '&quot;');
 }
 
 // MD5 Encoding

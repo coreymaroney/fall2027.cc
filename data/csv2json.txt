@@ -1,0 +1,1 @@
+python3 -c "import csv, json, sys; print(json.dumps(list(csv.DictReader(sys.stdin)), indent=2))" < whitelist.csv > output.json

@@ -434,50 +434,67 @@
             <div class="col-md-6 col-md-offset-3">
                 <h3>What are you waiting for?</h3>
                 <p>We would greatly appreciate if you could RSVP before 1st of November '17</p>
-                <form id="rsvp-form" class="rsvp-form"
-                      action=""
-                      method="POST">
+                <form id="rsvp-code-form" class="rsvp-form" action="" method="POST">
+                    <p id="invite-code-help">Enter the invite code from your invitation to continue.</p>
                     <div class="row">
-                        <div class="col-md-6 col-sm-6">
+                        <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
                             <div class="form-input-group">
-                                <i class="fa fa-envelope"></i><input type="email" name="email" class=""
-                                                                     placeholder="Your email"
-                                                                     required>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-sm-6">
-                            <div class="form-input-group">
-                                <i class="fa fa-user"></i><input name="name" class=""
-                                                                 placeholder="Your name"
-                                                                 required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-sm-6">
-                            <div class="form-input-group">
-                                <i class="fa fa-users"></i><input type="number" name="extras" class="" min="0"
-                                                                  max="4"
-                                                                  placeholder="Husband/Wife or kids"
-                                                                  required>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-sm-6">
-                            <div class="form-input-group">
-                                <i class="fa fa-key"></i><input type="number" name="invite_code" id="invite_code"
-                                                                class="" min="0"
+                                <label for="invite_code" class="sr-only">Invite code</label>
+                                <i class="fa fa-key" aria-hidden="true"></i><input type="text" id="invite_code"
+                                                                inputmode="numeric" autocomplete="off"
                                                                 placeholder="Invite code"
+                                                                aria-describedby="invite-code-help"
                                                                 required>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12" id="alert-wrapper"></div>
+                        <div class="col-md-12" id="rsvp-code-alert"></div>
                     </div>
-                    <button class="btn-fill rsvp-btn">
-                        Yes,
-                        that's me!
-                    </button>
+                    <button type="submit" class="btn-fill rsvp-btn">Continue</button>
+                </form>
+                <form id="rsvp-form" class="rsvp-form hidden"
+                      action=""
+                      method="POST">
+                    <fieldset id="rsvp-fieldset">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="guest_search" class="rsvp-label">Find your name on the guest list</label>
+                                <div class="guest-search">
+                                    <div class="form-input-group">
+                                        <i class="fa fa-search" aria-hidden="true"></i><input type="text" id="guest_search"
+                                                                    role="combobox" aria-autocomplete="list"
+                                                                    aria-expanded="false" aria-controls="guest-suggestions"
+                                                                    aria-describedby="guest-search-message"
+                                                                    autocomplete="off" autocapitalize="words" spellcheck="false"
+                                                                    placeholder="Start typing your name">
+                                    </div>
+                                    <ul id="guest-suggestions" class="guest-suggestions hidden" role="listbox"
+                                        aria-label="Matching guests"></ul>
+                                </div>
+                                <p id="guest-search-message" class="rsvp-hint" aria-live="polite"></p>
+                            </div>
+                        </div>
+                        <div id="party-section" class="hidden">
+                            <p class="rsvp-label" id="party-heading">Let us know who will be joining us</p>
+                            <div id="party-members" role="group" aria-labelledby="party-heading"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-input-group">
+                                    <label for="rsvp_email" class="sr-only">Your email</label>
+                                    <i class="fa fa-envelope" aria-hidden="true"></i><input type="email" id="rsvp_email" class=""
+                                                                         placeholder="Your email"
+                                                                         required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" id="alert-wrapper"></div>
+                        </div>
+                        <button type="submit" id="rsvp-submit" class="btn-fill rsvp-btn">Send RSVP</button>
+                        <button type="button" id="rsvp-change-code" class="btn btn-link">Use a different invite code</button>
+                    </fieldset>
                 </form>
             </div>
         </div>

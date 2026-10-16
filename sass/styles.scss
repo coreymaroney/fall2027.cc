@@ -821,7 +821,7 @@ RSVP form
         left: 30px;
         transform: translateY(-50%);
       }
-      i.fa-user, i.fa-users, i.fa-envelope, .fa-key {
+      i.fa-user, i.fa-users, i.fa-envelope, .fa-key, .fa-search {
         font-size: 14px;
         position: absolute;
         top: 50%;
@@ -848,6 +848,79 @@ RSVP form
       }
       input:-ms-input-placeholder {
         color: $form-placeholder;
+      }
+    }
+    .rsvp-label {
+      display: block;
+      text-align: left;
+      font-weight: normal;
+      margin-bottom: 8px;
+    }
+    .rsvp-hint {
+      text-align: left;
+      font-size: 13px;
+      min-height: 1.5em;
+      margin: 0 0 10px;
+    }
+    .guest-search {
+      position: relative;
+    }
+    .guest-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      max-height: 240px;
+      overflow-y: auto;
+      margin: -6px 0 0;
+      padding: 0;
+      list-style: none;
+      text-align: left;
+      background: $white-color;
+      border: solid 1px $keyline-color;
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+      li {
+        padding: 12px 20px;
+        cursor: pointer;
+        border-left: solid 3px transparent;
+      }
+      li:hover, li.active {
+        background: $section-dark;
+        border-left-color: $accent-color;
+      }
+      li.active {
+        font-weight: bold;
+      }
+    }
+    .party-member {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      text-align: left;
+      border: solid 1px $keyline-color;
+      border-radius: 5px;
+
+      &.attendance-missing {
+        border-color: #a94442;
+      }
+    }
+    .party-member-name {
+      font-weight: bold;
+      margin-right: 15px;
+    }
+    .attendance-option {
+      font-weight: normal;
+      margin: 5px 15px 5px 0;
+      cursor: pointer;
+
+      &:last-child {
+        margin-right: 0;
       }
     }
   }
