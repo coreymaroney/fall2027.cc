@@ -20,7 +20,8 @@ _See [wedding.rampatra.com](http://wedding.rampatra.com/) for a demo. Use invite
 3. `$ npm install` - install dependencies
 4. `$ gulp` - compile sass to css, minify js, etc.
 5. That's it, open `index.html` file on your browser by just double-clicking on it.
-6. node_modules/.bin/live-server --port=8000
+
+Install node live-server to use `node_modules/.bin/live-server --port=8000` for HMR
 
 # Documentation
 I have written a 
