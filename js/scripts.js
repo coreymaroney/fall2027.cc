@@ -213,7 +213,7 @@ $(document).ready(function () {
         'b0e53b10c1f55ede516b240036b88f40': {singleInvitee: true},
         'aa3f1b9374b921839be33e33cf44f4cd': {singleInvitee: false}
     };
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxu2S2_nZexp0vlnK_MWFQSdT5sg6wgMWgU6Qaf9VMakNfzwAwUgSUs3VavUGTxuOWBPg/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyOU2I9ITql0ewtYT554ExhtlmSDzFuUxyAAse2PfV-I0SROyduec-924l1YPgGnd99Cw/exec';
     var MAX_SUGGESTIONS = 8;
 
     var rsvpState = {code: null, config: null, selection: null, attendance: [], submitting: false, session: 0};

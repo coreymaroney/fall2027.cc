@@ -16,7 +16,7 @@ file rather than reordering it. After pasting this script, redeploy the web app 
 var TO_ADDRESS = "coreyj97@gmail.com"; // email to send the form data to
 
 // Public URL of the website's data/output.json
-var GUEST_LIST_URL = "https://YOUR-SITE-DOMAIN/data/output.json";
+var GUEST_LIST_URL = "https://raw.githubusercontent.com/coreymaroney/wedding-website/refs/heads/master/data/output.json";
 
 // 271117 may only RSVP for one guest; 74774 may RSVP for their whole party
 var INVITE_RULES = { "271117": { singleInvitee: true }, "74774": { singleInvitee: false } };
