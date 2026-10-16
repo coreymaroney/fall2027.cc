@@ -559,10 +559,8 @@ $(document).ready(function () {
 
         setSubmitting(true);
         $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
-        console.log("setSubmitting called with", RSVP_ENDPOINT, payload, response);
         $.post(RSVP_ENDPOINT, payload)
             .done(function (response) {
-                console.log("post.done with", RSVP_ENDPOINT, payload, response);
                 if (session !== rsvpState.session) {
                     return;
                 }
@@ -575,8 +573,7 @@ $(document).ready(function () {
                 showCodeStage();
                 $('#rsvp-modal').modal('show');
             })
-            .fail(function (e) {
-                console.log("post.fail with", e);
+            .fail(function () {
                 if (session !== rsvpState.session) {
                     return;
                 }
