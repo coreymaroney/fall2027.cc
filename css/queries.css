@@ -264,7 +264,7 @@
         height: 25px;
         top: 10px;
         right: 10px; }
-
+    /* content wrapper used as reference for rsvp below */
     #map-content-wrapper {
         margin-bottom: 0;
     }
