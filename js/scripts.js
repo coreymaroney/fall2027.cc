@@ -537,7 +537,7 @@ $(document).ready(function () {
 
         var rows = $('#party-members .party-member');
         if (!selection.events.length) {
-            $('#alert-wrapper').html(alert_markup('danger', 'Please contact Corey to confirm which events your party is invited to.'));
+            $('#alert-wrapper').html(alert_markup('danger', 'Please contact Corey.'));
             return;
         }
         var missing = [];
@@ -581,7 +581,7 @@ $(document).ready(function () {
                 }
                 setSubmitting(false);
                 if (!response || response.result !== 'success') {
-                    var message = response && response.message ? escape_html(response.message) : 'The RSVP service returned an unexpected response. Please contact Corey before submitting again.';
+                    var message = response && response.message ? escape_html(response.message) : 'The RSVP service returned an unexpected response. Please contact Corey.';
                     $('#alert-wrapper').html(alert_markup('danger', message));
                     return;
                 }
@@ -594,8 +594,8 @@ $(document).ready(function () {
                 }
                 setSubmitting(false);
                 var message = status === 'parsererror'
-                    ? 'The RSVP service did not return valid JSON. Please contact Corey to check the Apps Script deployment.'
-                    : 'We could not confirm whether your RSVP was saved. Your answers are still here. Please contact Corey before submitting again.';
+                    ? 'The RSVP service did not return valid JSON. Please contact Corey.'
+                    : 'We could not confirm whether your RSVP was saved. Your answers are still here. Please contact Corey.';
                 $('#alert-wrapper').html(alert_markup('danger', message));
             });
     });
