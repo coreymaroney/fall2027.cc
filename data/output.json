@@ -1,293 +1,361 @@
 [
   {
     "Guest": "Corey Maroney",
-    "Guest1": "Carina Taufiq"
+    "Guest1": "Carina Taufiq",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Alyssa Greenberg"
+    "Guest": "Alyssa Greenberg",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Robin"
+    "Guest": "Robin Paull",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Bob"
+    "Guest": "Bob Maroney",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Abdul",
-    "Guest1": "Lisa"
+    "Guest": "Abdul Taufiq",
+    "Guest1": "Lisa Taufiq",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Ciera",
-    "Guest1": "Josh"
+    "Guest": "Ciera Victor",
+    "Guest1": "Josh Victor",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Aimee"
+    "Guest": "Aimée Scorziello",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Megan"
+    "Guest": "Megan",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Carolyn"
+    "Guest": "Carolyn Sullivan",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Bill",
-    "Guest1": "Denice"
+    "Guest1": "Denice Joyce",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Greg",
-    "Guest1": "Michelle"
+    "Guest": "Greg Scorziello",
+    "Guest1": "Michelle Scorziello",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Indianna"
+    "Guest": "Indianna Scorziello",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Liam"
+    "Guest": "Liam Scorziello",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Farook",
-    "Guest1": "Shareen"
+    "Guest": "Farook Taufiq",
+    "Guest1": "Shareen Taufiq",
+    "tags": [""]
   },
   {
     "Guest": "Anthony Russo",
-    "Guest1": "Zach Rabon "
+    "Guest1": "Zach Rabon",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Morganne",
-    "Guest1": "Rory"
+    "Guest": "Morganne Adroved",
+    "Guest1": "Rory Makuch",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Marisa Mareiness",
-    "Guest1": "Steven "
+    "Guest1": "Steven ",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Ashley Ballowe"
+    "Guest": "Ashley Ballowe",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Melina",
-    "Guest1": "Danny"
+    "Guest": "Melina Metaxas",
+    "Guest1": "Dann Rotondi",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Zarah J",
-    "Guest1": "Keegan"
+    "Guest": "Zarah Jozefowicz",
+    "Guest1": "Keegan Hernandez",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Blake Blanchard"
+    "Guest": "Blake Blanchard",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Al Taufiq"
+    "Guest": "Al Taufiq",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Sal Taufiq"
+    "Guest": "Sal Taufiq",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Zubair Taufiq"
+    "Guest": "Zubair Taufiq",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Mo Taufiq"
-  },
-  {
-    "Guest": "Rihanna Taufiq"
-  },
-  {
-    "Guest": "Khairu Taufiq"
+    "Guest": "Mo Taufiq",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Miranda",
-    "Guest1": "Dakota"
+    "Guest1": "Dakota",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
     "Guest": "Victoria Blanchard",
-    "Guest1": "Chris"
+    "Guest1": "Chris",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Africa",
-    "Guest1": "Adam"
+    "Guest1": "Adam",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
     "Guest": "Vicki",
     "Guest1": "Myles",
-    "Guest2": "Kinsley"
+    "Guest2": "Kinsley",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
     "Guest": "Tiff",
-    "Guest1": "Lisa"
+    "Guest1": "Lisa",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Jordan H",
-    "Guest1": "Terry"
+    "Guest1": "Terry",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Andrew",
-    "Guest1": "Josh"
+    "Guest1": "Josh",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Farook",
-    "Guest1": "Zorah"
+    "Guest": "Farook Taufiq",
+    "Guest1": "Zorah",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Miriam",
-    "Guest1": "Terry"
+    "Guest": "Miriam Taufiq",
+    "Guest1": "",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Adam"
+    "Guest": "Adam Taufiq",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Pervez",
-    "Guest1": "Nicole"
-  },
-  {
-    "Guest": "Reshma",
-    "Guest1": "Todd"
+    "Guest1": "Nicole",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Kaitlyn",
-    "Guest1": "Alison"
+    "Guest1": "Alison",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Taylor",
-    "Guest1": "Kevin"
+    "Guest1": "Kevin",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Keely",
-    "Guest1": "Aimee"
+    "Guest1": "Aimee",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Jade",
-    "Guest1": "Liz"
+    "Guest1": "Liz",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Alex ",
-    "Guest1": "Anna "
+    "Guest1": "Anna ",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Tiffany"
+    "Guest": "Tiffany",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Ellen",
-    "Guest1": "Jose "
+    "Guest1": "Jose ",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Nik",
-    "Guest1": "Steven"
+    "Guest1": "Steven",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Ashley"
+    "Guest": "Ashley",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Alex"
+    "Guest": "Alex",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Cam Hoegen",
-    "Guest1": "Cat"
+    "Guest1": "Cat",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Jared Tonelli"
+    "Guest": "Jared Tonelli",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Luke Pulchinski",
-    "Guest1": "Natalie"
+    "Guest1": "Natalie",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Collin Morrison"
+    "Guest": "Collin Morrison",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Justin J"
+    "Guest": "Justin J",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Scott Neighbor",
-    "Guest1": "Terry"
+    "Guest1": "Terry",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Khristian",
-    "Guest1": "Terry"
+    "Guest1": "Terry",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Damon"
+    "Guest": "Damon",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Dave Morin"
+    "Guest": "Dave Morin",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Jonel",
-    "Guest1": "Terry"
+    "Guest1": "Terry",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Jake Nitschke",
-    "Guest1": "Amy"
+    "Guest1": "Amy",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Derek"
+    "Guest": "Derek Nelson",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Jon Palmer",
-    "Guest1": "Sam"
+    "Guest1": "Sam",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Marissa Campanini"
+    "Guest": "Marissa Campanini",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Dave Mather",
-    "Guest1": "Karen"
+    "Guest1": "Karen",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Timmy Barrow"
+    "Guest": "Timmy Barrow",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "TJ",
-    "Guest1": "Audrey"
+    "Guest1": "Audrey",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Britt Mather",
-    "Guest1": "Laramie"
+    "Guest1": "Laramie",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Allie Dibiase"
+    "Guest": "Allie Dibiase",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Andrew Dibiase"
+    "Guest": "Andrew Dibiase",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Dwayne P",
-    "Guest1": "Tina"
+    "Guest1": "Tina",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Carl Collina",
-    "Guest1": "Terry C"
+    "Guest1": "Terry C",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Brad ",
-    "Guest1": "Gavin"
+    "Guest1": "Gavin",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
-    "Guest": "Russel"
+    "Guest": "Russel",
+    "tags": ["Mehndi", "Wedding"]
   },
   {
     "Guest": "Beth Breinan",
-    "Guest1": "Terry"
+    "Guest1": "Terry",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Chris",
-    "Guest1": "Karen"
+    "Guest1": "Karen",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Tommy",
-    "Guest1": "Marilyn"
+    "Guest1": "Marilyn",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Colton Ford"
+    "Guest": "Colton Ford",
+    "tags": ["Wedding"]
   },
   {
-    "Guest": "Vinny Allen"
+    "Guest": "Vinny Allen",
+    "tags": ["Wedding"]
   },
   {
     "Guest": "Tommy Leconche",
-    "Guest1": "Morgan"
+    "Guest1": "Morgan",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
-    "Guest": "Sean Maher"
+    "Guest": "Sean Maher",
+    "tags": ["Rehearsal", "Mehndi", "Wedding"]
   },
   {
     "Guest": "Alex H",
-    "Guest1": "Catherine"
+    "Guest1": "Catherine",
+    "tags": ["Wedding"]
   }
 ]

@@ -1,9 +1,9 @@
 # Snippet description
 The following snippet powers the google spreedsheet @ https://docs.google.com/spreadsheets which delivers the RSVP data to the user via email and spreadsheet
 
-The `RSVP` sheet's header row must be: `timestamp,email,party_names,rsvp,invite_code`
+The `RSVP` sheet's header row must be: `timestamp,email,party_names,rehearsal,mehndi,wedding,invite_code`
 
-Each guest gets their own row with `YES`/`NO` in `rsvp`; `timestamp`, `email` and `invite_code` are only on the
+Each guest gets their own row with `YES`/`NO` for invited events and blank cells for uninvited events; `timestamp`, `email` and `invite_code` are only on the
 party's first row, and an empty row separates parties.
 
 Submissions are validated against the same `data/output.json` the website uses, fetched from the published site
@@ -20,6 +20,7 @@ var GUEST_LIST_URL = "https://raw.githubusercontent.com/coreymaroney/wedding-web
 
 // 271117 may only RSVP for one guest; 74774 may RSVP for their whole party
 var INVITE_RULES = { "271117": { singleInvitee: true }, "74774": { singleInvitee: false } };
+var RSVP_EVENTS = ["rehearsal", "mehndi", "wedding"];
 
 function errorResponse(message) {
   return ContentService
@@ -54,22 +55,40 @@ function getPartyMembers(partyId) {
   if (!row || typeof row !== "object" || Array.isArray(row)) {
     return null;
   }
-  var members = Object.keys(row).map(function (column) {
+  var members = Object.keys(row).filter(function (column) {
+    return /^Guest\d*$/.test(column);
+  }).map(function (column) {
     return typeof row[column] === "string" ? row[column].trim() : "";
   }).filter(function (name) { return name.length > 0; });
-  return members.length ? members : null;
+  var tags = Array.isArray(row.tags) ? row.tags : [];
+  var events = RSVP_EVENTS.filter(function (event) {
+    return tags.some(function (tag) {
+      return typeof tag === "string" && tag.trim().toLowerCase() === event;
+    });
+  });
+  return members.length ? { members: members, events: events } : null;
 }
 
 // Splits newline-delimited names and YES/NO answers; null unless they align one-to-one
-function parseResponses(namesText, rsvpText) {
+function parseResponses(data, events) {
   var split = function (text) {
-    return String(text || "").split(/\r?\n/).map(function (line) { return line.trim(); });
+    return text.split(/\r?\n/).map(function (line) { return line.trim(); });
   };
-  var names = split(namesText);
-  var answers = split(rsvpText);
-  var valid = names.length === answers.length &&
-      names.every(function (name) { return name.length > 0; }) &&
-      answers.every(function (answer) { return answer === "YES" || answer === "NO"; });
+  if (typeof data.party_names !== "string" || !events.length) return null;
+  var names = split(data.party_names);
+  if (!names.every(function (name) { return name.length > 0; })) return null;
+  var answers = {};
+  var valid = RSVP_EVENTS.every(function (event) {
+    if (typeof data[event] !== "string") return false;
+    if (events.indexOf(event) === -1) {
+      answers[event] = names.map(function () { return ""; });
+      return data[event] === "";
+    }
+    answers[event] = split(data[event]);
+    return answers[event].length === names.length && answers[event].every(function (answer) {
+      return answer === "YES" || answer === "NO";
+    });
+  });
   return valid ? { names: names, answers: answers } : null;
 }
 
@@ -96,7 +115,7 @@ function doPost(e) {
       return errorResponse("Sorry, we couldn't find your party on the guest list.");
     }
 
-    var responses = parseResponses(e.parameter.party_names, e.parameter.rsvp);
+    var responses = parseResponses(e.parameter, party.events);
     if (!responses) {
       return errorResponse("Sorry, we couldn't read your RSVP. Please answer for every guest and try again.");
     }
@@ -106,7 +125,7 @@ function doPost(e) {
     }
 
     // Every name must belong to the party, each used at most once
-    var remaining = party.slice();
+    var remaining = party.members.slice();
     for (var i = 0; i < partyNames.length; i++) {
       var index = remaining.indexOf(partyNames[i]);
       if (index === -1) {
@@ -114,15 +133,23 @@ function doPost(e) {
       }
       remaining.splice(index, 1);
     }
+    if (!INVITE_RULES[inviteCode].singleInvitee &&
+        (partyNames.length !== party.members.length || partyNames.some(function (name, memberIndex) {
+          return name !== party.members[memberIndex];
+        }))) {
+      return errorResponse("Please respond for every member of your party in guest-list order.");
+    }
 
     var mailData = {
       email: email,
       party_names: partyNames.join("\n"),
-      rsvp: responses.answers.join("\n"),
       invite_code: inviteCode
     };
+    RSVP_EVENTS.forEach(function (event) {
+      mailData[event] = party.events.indexOf(event) === -1 ? "" : responses.answers[event].join("\n");
+    });
     
-    record_data(mailData);
+    record_data(mailData, party.events);
     
     MailApp.sendEmail({
       to: TO_ADDRESS,
@@ -144,8 +171,8 @@ function doPost(e) {
 /**
  * This method inserts one row per guest into the sheet, followed by an empty separator row.
  */
-function record_data(data) {
-  var responses = parseResponses(data.party_names, data.rsvp);
+function record_data(data, events) {
+  var responses = parseResponses(data, events);
   if (!responses) {
     throw new Error("Invalid RSVP responses");
   }
@@ -155,19 +182,23 @@ function record_data(data) {
     var doc     = SpreadsheetApp.getActiveSpreadsheet();
     var sheet   = doc.getSheetByName('RSVP'); // select the RSVP sheet
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (headers.join(",") !== "timestamp,email,party_names,rehearsal,mehndi,wedding,invite_code") {
+      throw new Error("RSVP sheet headers do not match the event schema");
+    }
     var lastRow = sheet.getLastRow();
     // Skip one row after the previous party; it stays empty as the separator
     var nextRow = lastRow > 1 ? lastRow + 2 : lastRow + 1;
     var timestamp = new Date().toUTCString();
     var rows = responses.names.map(function (name, p) {
-      return headers.map(function (header, col) {
+      return headers.map(function (header) {
         if (header === "party_names") return name;
-        if (header === "rsvp") return responses.answers[p];
+        if (RSVP_EVENTS.indexOf(header) !== -1) return responses.answers[header][p];
         if (p > 0) return ""; // shared fields only on the party's first row
-        if (col === 0) return timestamp; // first column is always the timestamp
+        if (header === "timestamp") return timestamp;
         return data.hasOwnProperty(header) ? data[header] : "";
       });
     });
+    rows.push(headers.map(function () { return ""; }));
     sheet.getRange(nextRow, 1, rows.length, headers.length).setValues(rows);
     SpreadsheetApp.flush();
   }

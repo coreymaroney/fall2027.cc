@@ -213,7 +213,7 @@ $(document).ready(function () {
         'b0e53b10c1f55ede516b240036b88f40': {singleInvitee: true},
         'aa3f1b9374b921839be33e33cf44f4cd': {singleInvitee: false}
     };
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxY-LgU_ufyHNdEiiXhWvW0ZcCzkGfQ8g-RQaas7Ubacoo5k84U9-TNdZ2gY3YP3lFUw/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXRmaUyURo4JkwYixXcX8B-xq0gOu_BOyHIZBKvlU549qurfAACjyS9b5W2m010CyPlg/exec';
     var MAX_SUGGESTIONS = 8;
 
     var rsvpState = {code: null, config: null, selection: null, attendance: [], submitting: false, session: 0};
@@ -312,9 +312,9 @@ $(document).ready(function () {
                 return {name: name};
             });
 
-        rsvpState.selection = {partyId: option.partyId, members: members};
+        rsvpState.selection = {partyId: option.partyId, members: members, events: party.events};
         rsvpState.attendance = members.map(function () {
-            return null;
+            return {};
         });
         searchInput.val(option.name);
         closeSuggestions();
@@ -390,25 +390,34 @@ $(document).ready(function () {
         var container = $('#party-members').empty();
         $.each(rsvpState.selection.members, function (i, member) {
             var nameId = 'party-member-' + i;
-            var row = $('<div class="party-member" role="radiogroup"></div>').attr('aria-labelledby', nameId);
+            var row = $('<div class="party-member"></div>');
             $('<span class="party-member-name"></span>').attr('id', nameId).text(member.name).appendTo(row);
-            var choices = $('<span class="party-member-choices"></span>').appendTo(row);
-            $.each([[true, 'Will attend'], [false, 'Will not attend']], function (j, choice) {
-                var label = $('<label class="attendance-option"></label>');
-                $('<input type="radio">')
-                    .attr({name: 'attendance-' + i, value: choice[0] ? 'yes' : 'no'})
-                    .data({member: i, attending: choice[0]})
-                    .appendTo(label);
-                label.append(document.createTextNode(' ' + choice[1]));
-                choices.append(label);
+            var events = $('<div class="party-member-events"></div>').appendTo(row);
+            $.each(rsvpState.selection.events, function (eventIndex, event) {
+                var eventId = nameId + '-' + event;
+                var group = $('<div role="radiogroup"></div>').attr('aria-labelledby', nameId + ' ' + eventId).appendTo(events);
+                $('<span></span>').attr('id', eventId).text(event.charAt(0).toUpperCase() + event.slice(1)).appendTo(group);
+                var choices = $('<span class="party-member-choices"></span>').appendTo(group);
+                $.each([[true, 'Will attend'], [false, 'Will not attend']], function (j, choice) {
+                    var label = $('<label class="attendance-option"></label>');
+                    $('<input type="radio">')
+                        .attr({name: 'attendance-' + i + '-' + event, value: choice[0] ? 'yes' : 'no'})
+                        .data({member: i, event: event, attending: choice[0]})
+                        .appendTo(label);
+                    label.append(document.createTextNode(' ' + choice[1]));
+                    choices.append(label);
+                });
             });
             container.append(row);
         });
+        if (!rsvpState.selection.events.length) {
+            container.append($('<p></p>').text('No events are listed for your party. Please contact Corey to confirm your invitation.'));
+        }
         $('#party-section').removeClass('hidden');
     }
 
     $('#party-members').on('change', 'input[type=radio]', function () {
-        rsvpState.attendance[$(this).data('member')] = $(this).data('attending');
+        rsvpState.attendance[$(this).data('member')][$(this).data('event')] = $(this).data('attending');
         $(this).closest('.party-member').removeClass('attendance-missing').removeAttr('aria-invalid');
     });
 
@@ -527,16 +536,22 @@ $(document).ready(function () {
         }
 
         var rows = $('#party-members .party-member');
+        if (!selection.events.length) {
+            $('#alert-wrapper').html(alert_markup('danger', 'Please contact Corey to confirm which events your party is invited to.'));
+            return;
+        }
         var missing = [];
         $.each(selection.members, function (i, member) {
-            var unanswered = rsvpState.attendance[i] !== true && rsvpState.attendance[i] !== false;
+            var unanswered = selection.events.some(function (event) {
+                return typeof rsvpState.attendance[i][event] !== 'boolean';
+            });
             rows.eq(i).toggleClass('attendance-missing', unanswered).attr('aria-invalid', unanswered ? 'true' : null);
             if (unanswered) {
                 missing.push(escape_html(member.name));
             }
         });
         if (missing.length) {
-            $('#alert-wrapper').html(alert_markup('danger', 'Please choose <strong>Will attend</strong> or <strong>Will not attend</strong> for: ' + missing.join(', ') + '.'));
+            $('#alert-wrapper').html(alert_markup('danger', 'Please answer for every invited event for: ' + missing.join(', ') + '.'));
             rows.filter('.attendance-missing').first().find('input').first().focus();
             return;
         }
@@ -544,17 +559,17 @@ $(document).ready(function () {
         var partyNames = selection.members.map(function (member) {
             return member.name;
         });
-        var responses = rsvpState.attendance.map(function (attending) {
-            return attending ? 'YES' : 'NO';
-        });
-
         var payload = {
             email: $.trim($('#rsvp_email').val()),
             party_names: partyNames.join('\n'),
-            rsvp: responses.join('\n'),
             invite_code: rsvpState.code,
             party_id: selection.partyId
         };
+        ['rehearsal', 'mehndi', 'wedding'].forEach(function (event) {
+            payload[event] = selection.events.indexOf(event) === -1 ? '' : selection.members.map(function (member, memberIndex) {
+                return rsvpState.attendance[memberIndex][event] ? 'YES' : 'NO';
+            }).join('\n');
+        });
         var session = rsvpState.session;
 
         setSubmitting(true);
@@ -586,7 +601,7 @@ $(document).ready(function () {
 
 /********************** Guest list **********************/
 
-// Each output.json row is one party; its non-empty values, in column order, are the members
+// Each output.json row is one party; Guest columns retain their dataset order
 function buildGuestIndex(rows) {
     if (!Array.isArray(rows)) {
         throw new Error('Guest list must be an array');
@@ -599,13 +614,21 @@ function buildGuestIndex(rows) {
         if (!row || typeof row !== 'object' || Array.isArray(row)) {
             return;
         }
-        var members = Object.keys(row).map(function (column) {
+        var members = Object.keys(row).filter(function (column) {
+            return /^Guest\d*$/.test(column);
+        }).map(function (column) {
             return typeof row[column] === 'string' ? row[column].trim() : '';
         }).filter(Boolean);
         if (!members.length) {
             return;
         }
-        parties[partyId] = {partyId: partyId, members: members};
+        var tags = Array.isArray(row.tags) ? row.tags : [];
+        var events = ['rehearsal', 'mehndi', 'wedding'].filter(function (event) {
+            return tags.some(function (tag) {
+                return typeof tag === 'string' && tag.trim().toLowerCase() === event;
+            });
+        });
+        parties[partyId] = {partyId: partyId, members: members, events: events};
         members.forEach(function (name, memberIndex) {
             var key = name.toLowerCase();
             nameCounts[key] = (nameCounts[key] || 0) + 1;

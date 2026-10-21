@@ -1,3 +1,13 @@
+.rsvp .party-member-events {
+    width: 100%;
+    min-width: 0;
+}
+
+.rsvp .party-member-events [role="radiogroup"] > span:first-child {
+    display: block;
+    margin-top: 8px;
+}
+
 @media screen and (max-width: 1200px) {
     header {
         width: 90%;
