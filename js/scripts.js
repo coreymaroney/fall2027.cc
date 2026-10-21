@@ -576,6 +576,7 @@ $(document).ready(function () {
         $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
         $.post(RSVP_ENDPOINT, payload)
             .done(function (response) {
+                console.log("response", response, response.result)
                 if (session !== rsvpState.session) {
                     return;
                 }
