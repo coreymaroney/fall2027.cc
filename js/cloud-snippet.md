@@ -96,7 +96,7 @@ function parseResponses(data, events) {
  * This method is the entry point.
  */
 function doPost(e) {
-
+  var stage = "validation";
   try {
     var inviteCode = String(e.parameter.invite_code || "").trim();
     if (!INVITE_RULES.hasOwnProperty(inviteCode)) { // validate invite code before saving data
@@ -110,6 +110,7 @@ function doPost(e) {
     }
 
     var rawPartyId = String(e.parameter.party_id || "").trim();
+    stage = "guest-list";
     var party = /^\d+$/.test(rawPartyId) ? getPartyMembers(Number(rawPartyId)) : null;
     if (!party) {
       return errorResponse("Sorry, we couldn't find your party on the guest list.");
@@ -149,8 +150,10 @@ function doPost(e) {
       mailData[event] = party.events.indexOf(event) === -1 ? "" : responses.answers[event].join("\n");
     });
     
+    stage = "spreadsheet";
     record_data(mailData, party.events);
     
+    stage = "email";
     MailApp.sendEmail({
       to: TO_ADDRESS,
       subject: "A new guest RSVP'd for your wedding",
@@ -162,8 +165,23 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({"result":"success","data": JSON.stringify(mailData) }))
           .setMimeType(ContentService.MimeType.JSON);
   } catch(error) { // if error return this
-    Logger.log(error);
-    return errorResponse("Sorry, there is an issue with the server.");
+    Logger.log("RSVP failure at " + stage + ": " + error.message);
+    if (stage === "email") {
+      return errorResponse("Your RSVP was saved, but the notification email could not be sent. Please contact Corey; do not submit again.");
+    }
+    if (stage === "guest-list") {
+      return errorResponse("The RSVP guest list could not be loaded. Please contact Corey to check the guest-list URL and Apps Script permissions.");
+    }
+    if (stage === "spreadsheet") {
+      if (error.message === "RSVP sheet headers do not match the event schema") {
+        return errorResponse("The RSVP sheet headers must be exactly: timestamp, email, party_names, rehearsal, mehndi, wedding, invite_code. Please contact Corey.");
+      }
+      if (error.message === "RSVP spreadsheet is unavailable" || error.message === "RSVP sheet is missing") {
+        return errorResponse("The RSVP spreadsheet or RSVP tab is unavailable. Please contact Corey to check the script's spreadsheet connection.");
+      }
+      return errorResponse("Your RSVP could not be saved to the spreadsheet. Please contact Corey to check the Apps Script execution log.");
+    }
+    return errorResponse("The RSVP request could not be processed. Please contact Corey.");
   }
 }
 
@@ -180,7 +198,9 @@ function record_data(data, events) {
   lock.waitLock(10000); // keep concurrent parties from interleaving rows
   try {
     var doc     = SpreadsheetApp.getActiveSpreadsheet();
+    if (!doc) throw new Error("RSVP spreadsheet is unavailable");
     var sheet   = doc.getSheetByName('RSVP'); // select the RSVP sheet
+    if (!sheet) throw new Error("RSVP sheet is missing");
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     if (headers.join(",") !== "timestamp,email,party_names,rehearsal,mehndi,wedding,invite_code") {
       throw new Error("RSVP sheet headers do not match the event schema");

@@ -574,27 +574,29 @@ $(document).ready(function () {
 
         setSubmitting(true);
         $('#alert-wrapper').html(alert_markup('info', '<strong>Just a sec!</strong> We are saving your details.'));
-        $.post(RSVP_ENDPOINT, payload)
+        $.ajax({url: RSVP_ENDPOINT, type: 'POST', data: payload, dataType: 'json'})
             .done(function (response) {
-                console.log("response", response, response.result)
                 if (session !== rsvpState.session) {
                     return;
                 }
                 setSubmitting(false);
                 if (!response || response.result !== 'success') {
-                    var message = response && response.message ? escape_html(response.message) : '<strong>Sorry!</strong> There is some issue with the server.';
+                    var message = response && response.message ? escape_html(response.message) : 'The RSVP service returned an unexpected response. Please contact Corey before submitting again.';
                     $('#alert-wrapper').html(alert_markup('danger', message));
                     return;
                 }
                 showCodeStage();
                 $('#rsvp-modal').modal('show');
             })
-            .fail(function () {
+            .fail(function (request, status) {
                 if (session !== rsvpState.session) {
                     return;
                 }
                 setSubmitting(false);
-                $('#alert-wrapper').html(alert_markup('danger', '<strong>Sorry!</strong> There is some issue with the server. Your answers are still here, please try again.'));
+                var message = status === 'parsererror'
+                    ? 'The RSVP service did not return valid JSON. Please contact Corey to check the Apps Script deployment.'
+                    : 'We could not confirm whether your RSVP was saved. Your answers are still here. Please contact Corey before submitting again.';
+                $('#alert-wrapper').html(alert_markup('danger', message));
             });
     });
 
