@@ -21,21 +21,11 @@
 
 }
 
-@media screen and (max-width: 1024px) {
-    .hero .hero-content {
-        padding-top: 50%;
-    }
-}
-
 /* Responsive nav kicks in */
 @media screen and (max-width: 991px) {
     header {
         width: 90%;
         padding-left: 25px;
-    }
-
-    .hero .hero-content {
-        padding-top: 50%;
     }
 
     .header-nav {
@@ -226,31 +216,9 @@
         margin-top: 0;
     }
 
-    .events .leftcol {
-        padding: 0 15px;
-        margin-bottom: 15px;
-        border-right: none;
-    }
-
-    .events .rightcol {
-        padding: 0 20px;
-    }
     
     #eng-pics .img-wrap {
         border-radius: 0;
-    }
-
-    #map-content-wrapper {
-        margin-bottom: 40px;
-    }
-    
-    #map-content {
-        margin-top: 0;
-        padding: 35px;
-    }
-
-    .rsvp {
-        padding-top: 80px;
     }
 
     footer .social-share {
@@ -263,10 +231,6 @@
 }
 
 @media screen and (max-width: 640px) {
-    .hero .hero-content {
-        padding-top: 100%;
-    }
-
     #eng-pics .img-wrap i {
         font-size: 25px;
         position: absolute;
@@ -274,10 +238,6 @@
         height: 25px;
         top: 10px;
         right: 10px; }
-    /* content wrapper used as reference for rsvp below */
-    #map-content-wrapper {
-        margin-bottom: 0;
-    }
     
     footer ul.footer-group {
         border-top: none;
@@ -302,12 +262,8 @@
 }
 
 @media screen and (max-width: 480px) {
-    .hero .hero-content {
-        padding-top: 110%;
-    }
-    
     .hero .hero-content img {
-        width: 65%;
+        width: 280px;
     }
 
     .hero .btn {
@@ -365,12 +321,31 @@
 
 }
 
-@media screen and (max-width: 320px) {
-    .hero .hero-content {
-        padding-top: 130%;
+@media screen and (max-width: 767px) {
+    .hero {
+        background-image: image-set(url('../img/hero-mobile.webp') type('image/webp'), url('../img/hero.jpg') type('image/jpeg'));
     }
-
+    .events .event-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+    .events .event-grid .event-day {
+        grid-template-rows: auto;
+    }
+    .events .event-grid .event-day + .event-day {
+        border-top: 1px solid #E6E9EA;
+        padding-top: 32px;
+    }
+    #map {
+        padding: 64px 0 32px;
+    }
+    #map-content {
+        padding: 24px;
+    }
+    #map-content-wrapper {
+        padding-bottom: 32px;
+    }
     .rsvp {
-        padding-top: 20px;
+        padding-top: 32px;
     }
 }

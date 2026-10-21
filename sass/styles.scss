@@ -1,7 +1,3 @@
-// Google Fonts
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800);
-@import url(https://fonts.googleapis.com/css?family=Merriweather:400,300,400italic,300italic,700,700italic);
-@import url(https://fonts.googleapis.com/css?family=Nunito:400,300,700);
 // Imports
 //@import "compass";
 @import "partials/typography";
@@ -10,10 +6,34 @@
 @import "partials/layout";
 
 @font-face {
-  font-family: 'StyleScript-Regular';
-  src: url('../fonts/StyleScript-Regular.ttf') format('truetype');
-  font-weight: normal;
+  font-family: 'Tangerine';
+  src: url('../fonts/Tangerine-Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Tangerine';
+  src: url('../fonts/Tangerine-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('../fonts/NotoSans-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-stretch: 62.5% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('../fonts/NotoSans-Italic-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-stretch: 62.5% 100%;
+  font-style: italic;
+  font-display: swap;
 }
 
 /* ==========================================================================
@@ -73,7 +93,7 @@ section .header {
   position: absolute;
   z-index: 1070;
   display: block;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: $sans-serif;
   font-size: 12px;
   font-weight: normal;
   line-height: 1.4;
@@ -258,13 +278,22 @@ Navigation
 Hero
 ========================================================================== */
 .hero {
-  min-height: 750px;
-  background: url('../img/hero-min.jpg') center center;
+  min-height: 640px;
+  min-height: min(820px, calc(100svh - 48px));
+  background: url('../img/hero.jpg') left center;
+  background-image: image-set(url('../img/hero.webp') type('image/webp'), url('../img/hero.jpg') type('image/jpeg'));
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
   position: relative;
+  display: flex;
+  align-items: center;
+
+  > .container {
+    padding-top: 140px;
+    padding-bottom: 64px;
+  }
 
   /*.rsvp-btn {
     position: absolute;
@@ -279,23 +308,52 @@ Hero
     margin-bottom: 40px;
   }
   p.intro {
-    font-family: 'StyleScript-Regular', serif;
+    font-family: $sans-serif;
     color: $txt-light;
     font-size: 20px;
     font-weight: 300;
     margin-bottom: 80px;
   }
   .hero-content {
-    padding-top: 40%;
+    padding-top: 0;
   }
   .hero-content img {
-    width: 55%;
-    margin-bottom: 12%;
+    width: 480px;
+    height: auto;
+    max-width: 90%;
+    margin-bottom: 40px;
   }
+}
+.site-entry {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: grid;
+  place-items: center;
+  background: #372428;
+  pointer-events: none;
+  animation: entry-exit 600ms 850ms cubic-bezier(.22, 1, .36, 1) forwards;
+
+  img {
+    width: 134px;
+    height: auto;
+    animation: entry-logo 850ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+}
+@keyframes entry-logo {
+  from { opacity: 0; transform: translateY(12px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes entry-exit {
+  to { opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-entry { display: none; }
 }
 .navigation {
   transition: all 300ms ease-in-out;
   position: fixed;
+  top: 0;
   width: 100%;
   z-index: 999;
 }
@@ -560,15 +618,30 @@ Features-stack
 .events
 ========================================================================== */
 .events {
-  .leftcol {
-    padding-right: 100px;
-    border-right: solid 1px $keyline-color;
+  text-align: center;
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 64px;
+    max-width: 960px;
+    margin: 0 auto;
+
+    &:before, &:after { display: none; }
   }
-  .rightcol {
-    padding-left: 100px;
+  .event-grid .event-day {
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 24px;
+    float: none;
+    width: auto;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    min-width: 0;
   }
 
   .time {
+    font-family: $sans-serif;
     font-size: 13px;
     font-style: italic;
     text-transform: lowercase;
@@ -671,8 +744,8 @@ Embed video
 #video-content h5 {
   color: #ffffff;
   font-size: 30px;
-  font-weight: 300;
-  letter-spacing: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 #video-content p {
   color: #ffffff;
@@ -682,17 +755,33 @@ Embed video
 Google map
 ========================================================================== */
 #map-canvas {
-  height: 500px;
+  grid-area: 1 / 1;
+  min-height: 500px;
+  height: 100%;
   width: 100%;
 }
-#map-content-wrapper {
+.map-layout {
+  display: grid;
   position: relative;
-  margin-top: -502px;
-  margin-bottom: 150px;
+  grid-template-columns: minmax(0, 1fr);
+}
+#map {
+  padding: 72px 0 48px;
+  > .text-center { padding: 0 20px 24px; }
+}
+#map-content-wrapper {
+  grid-area: 1 / 1;
+  position: relative;
+  align-self: start;
+  width: 100%;
+  max-width: 1170px;
+  margin: 0 auto;
+  padding-top: 24px;
+  padding-bottom: 48px;
 }
 #map-content {
-  margin-top: 40px;
-  padding: 50px 60px;
+  margin-top: 16px;
+  padding: 32px;
   background: #fff;
   -webkit-transition: opacity 0.5s, visibility 0.6s, margin-top 0.5s;
   transition: opacity 0.5s, visibility 0.6s, margin-top 0.5s;
@@ -720,6 +809,7 @@ Google map
 RSVP form
 ========================================================================== */
 .rsvp {
+  padding-top: 48px;
   padding-bottom: 140px;
   .rsvp-form {
     .rsvp-btn {
