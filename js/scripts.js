@@ -206,6 +206,17 @@ $(document).ready(function () {
 
     $('#add-to-cal').html(myCalendar);
 
+    /********************** Countdown **********************/
+    var countdown = $('#wedding-countdown');
+    var now = new Date();
+    // Compare calendar dates in UTC so daylight-saving shifts can't skew the count
+    var daysLeft = Math.round((Date.UTC(2027, 8, 11) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+    if (daysLeft > 0) {
+        countdown.html('<span class="countdown-number">' + daysLeft + '</span>' + (daysLeft === 1 ? 'day' : 'days') + ' to go');
+    } else if (daysLeft === 0) {
+        countdown.text('Today\'s the day!');
+    }
+
 
     /********************** RSVP **********************/
     // Keyed by MD5 of the invite code: 271117 (single invitee), 74774 (whole party)

@@ -323,6 +323,24 @@ Hero
     max-width: 90%;
     margin-bottom: 40px;
   }
+  .countdown {
+    margin: -8px 0 32px;
+    padding: 0;
+    color: $txt-light;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  }
+  .countdown-number {
+    display: block;
+    font-family: $serif;
+    font-size: 72px;
+    font-weight: $bold;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+  }
 }
 .site-entry {
   position: fixed;
@@ -617,28 +635,30 @@ Features-stack
 /* ==========================================================================
 .events
 ========================================================================== */
-.events {
-  text-align: center;
-  .event-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 64px;
-    max-width: 960px;
-    margin: 0 auto;
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px;
+  max-width: 960px;
+  margin: 0 auto;
 
-    &:before, &:after { display: none; }
-  }
-  .event-grid .event-day {
-    display: grid;
-    grid-template-rows: repeat(2, 1fr);
-    gap: 24px;
-    float: none;
-    width: auto;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    min-width: 0;
-  }
+  &:before, &:after { display: none; }
+}
+.event-grid .event-day {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 24px;
+}
+.event-grid .event-day, .event-grid .travel-col {
+  float: none;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.events, .travel {
+  text-align: center;
 
   .time {
     font-family: $sans-serif;
@@ -647,6 +667,27 @@ Features-stack
     text-transform: lowercase;
     color: $txt-primary;
   }
+}
+.schedule-veil {
+  position: relative;
+
+  .event-grid {
+    filter: blur(10px);
+    user-select: none;
+    pointer-events: none;
+  }
+}
+.schedule-veil-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  font-family: $serif;
+  font-size: 44px;
+  font-weight: $bold;
+  color: $h3-color;
 }
 
 /* ==========================================================================
@@ -728,6 +769,35 @@ Engagement Pics
 }
 
 /* ==========================================================================
+Wedding party
+========================================================================== */
+#wedding-party {
+  .wedding-party-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  h4 {
+    margin: 20px 0 4px;
+    color: $h3-color;
+  }
+  p {
+    margin: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* ==========================================================================
 Embed video
 ========================================================================== */
 #video-bg {
@@ -768,6 +838,13 @@ Google map
 #map {
   padding: 72px 0 48px;
   > .text-center { padding: 0 20px 24px; }
+}
+.travel {
+  margin-bottom: 48px;
+}
+.travel-hotel {
+  max-width: 640px;
+  margin: 0 auto 48px;
 }
 #map-content-wrapper {
   grid-area: 1 / 1;

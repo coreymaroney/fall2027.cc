@@ -325,16 +325,24 @@
     .hero {
         background-image: image-set(url('../img/hero-mobile.webp') type('image/webp'), url('../img/hero.jpg') type('image/jpeg'));
     }
-    .events .event-grid {
+    .event-grid {
         grid-template-columns: minmax(0, 1fr);
         gap: 32px;
     }
-    .events .event-grid .event-day {
+    .event-grid .event-day {
         grid-template-rows: auto;
     }
-    .events .event-grid .event-day + .event-day {
+    .event-grid > div + div {
         border-top: 1px solid #E6E9EA;
         padding-top: 32px;
+    }
+    #wedding-party .wedding-party-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 32px 16px;
+    }
+    #wedding-party h4 {
+        font-size: 26px;
+        margin-top: 12px;
     }
     #map {
         padding: 64px 0 32px;
