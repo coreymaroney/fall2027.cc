@@ -348,7 +348,7 @@ Hero
   z-index: 1000000;
   display: grid;
   place-items: center;
-  background: #372428;
+  background: $section-dark;
   pointer-events: none;
   animation: entry-exit 600ms 850ms cubic-bezier(.22, 1, .36, 1) forwards;
 
@@ -377,7 +377,7 @@ Hero
 }
 .fixed {
   position: fixed;
-  background-color: rgba(55, 36, 40, .88);
+  background-color: $header-color;
   z-index: 999;
   width: 100%;
 }
@@ -687,15 +687,41 @@ Features-stack
   font-family: $serif;
   font-size: 44px;
   font-weight: $bold;
-  color: $h3-color;
+  color: $white-color;
 }
 
 /* ==========================================================================
 Instagram
 ========================================================================== */
 #instagram {
-  img {
-    width: 100%;
+  .registry-link {
+    display: block;
+    position: relative;
+    width: 280px;
+    max-width: 100%;
+    margin: 0 auto;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: blur(10px);
+      pointer-events: none;
+      user-select: none;
+    }
+  }
+
+  .registry-link-label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 16px 16px 90px 16px;
+    font-family: $serif;
+    font-size: 44px;
+    font-weight: $bold;
+    color: $white-color;
   }
 }
 
@@ -785,7 +811,8 @@ Wedding party
     height: auto;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 8px;
+    filter: drop-shadow(2px 4px 6px $accent-color);
   }
   h4 {
     margin: 20px 0 4px;
@@ -795,6 +822,12 @@ Wedding party
     margin: 0;
     padding-bottom: 0;
   }
+}
+
+.placeholder-blur {
+  filter: blur(12px);
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ==========================================================================
