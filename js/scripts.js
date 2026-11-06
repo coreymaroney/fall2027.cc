@@ -32,11 +32,6 @@ $(document).ready(function () {
     }, {
         offset: '75%'
     });
-    $('.wp7').waypoint(function () {
-        $('.wp7').addClass('animated fadeInUp');
-    }, {
-        offset: '75%'
-    });
     $('.wp8').waypoint(function () {
         $('.wp8').addClass('animated fadeInLeft');
     }, {
@@ -48,25 +43,13 @@ $(document).ready(function () {
         offset: '75%'
     });
 
-    /***************** Initiate Flexslider ******************/
-    $('.flexslider').flexslider({
-        animation: "slide"
-    });
-
     /***************** Initiate Fancybox ******************/
-
-    $('.single_image').fancybox({
-        padding: 4
-    });
 
     $('.fancybox').fancybox({
         padding: 4,
         width: 1000,
         height: 800
     });
-
-    /***************** Tooltips ******************/
-    $('[data-toggle="tooltip"]').tooltip();
 
     /***************** Nav Transformicon ******************/
 
@@ -135,31 +118,6 @@ $(document).ready(function () {
         });
 
     });
-
-    /********************** Social Share buttons ***********************/
-    var share_bar = document.getElementsByClassName('share-bar');
-    var po = document.createElement('script');
-    po.type = 'text/javascript';
-    po.async = true;
-    po.src = 'https://apis.google.com/js/platform.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(po, s);
-
-    for (var i = 0; i < share_bar.length; i++) {
-        var html = '<iframe allowtransparency="true" frameborder="0" scrolling="no"' +
-            'src="https://platform.twitter.com/widgets/tweet_button.html?url=' + encodeURIComponent(window.location) + '&amp;text=' + encodeURIComponent(document.title) + '&amp;via=ramswarooppatra&amp;hashtags=ramandantara&amp;count=horizontal"' +
-            'style="width:105px; height:21px;">' +
-            '</iframe>' +
-
-            '<iframe src="//www.facebook.com/plugins/like.php?href=' + encodeURIComponent(window.location) + '&amp;width&amp;layout=button_count&amp;action=like&amp;show_faces=false&amp;share=true&amp;height=21&amp;appId=101094500229731&amp;width=150" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe>' +
-
-            '<div class="g-plusone" data-size="medium"></div>';
-
-        // '<iframe src="https://plusone.google.com/_/+1/fastbutton?bsv&amp;size=medium&amp;url=' + encodeURIComponent(window.location) + '" allowtransparency="true" frameborder="0" scrolling="no" title="+1" style="width:105px; height:21px;"></iframe>';
-
-        share_bar[i].innerHTML = html;
-        share_bar[i].style.display = 'inline-block';
-    }
 
     /********************** Embed youtube video *********************/
     $('.player').YTPlayer();
@@ -714,20 +672,6 @@ function initMap() {
 
     var marker = new google.maps.Marker({
         position: house,
-        map: map
-    });
-}
-
-function initBBSRMap() {
-    var la_fiesta = {lat: 20.305826, lng: 85.85480189999998};
-    var map = new google.maps.Map(document.getElementById('map-canvas'), {
-        zoom: 15,
-        center: la_fiesta,
-        scrollwheel: false
-    });
-
-    var marker = new google.maps.Marker({
-        position: la_fiesta,
         map: map
     });
 }

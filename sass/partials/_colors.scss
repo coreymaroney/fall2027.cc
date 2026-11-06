@@ -2,16 +2,15 @@
 
 // Text colours
 $txt-primary: #212415;        // Deep charcoal olive for clean, crisp body text
-$txt-secondary: #5a6333;      // Muted herbal green for secondary metadata and dates
 $txt-light: #f4f3ed;          // Soft warm cream text for dark section readability
-$txt-accent: #383f18;         // Main deep moss green for primary text accents
 $form-placeholder: #a1a791;   // Soft sage-grey for accessible form placeholders
 
 // Global colours
 $accent-color: #dcc294;       // Luminous champagne gold; elegant and soft on green backgrounds
 $accent-color-hover: #c4aa7c; // Deeper warm gold for smooth interactive hover states
 $white-color: #f4f3ed;        // Soft warm cream canvas instead of clinical stark white
-$black-color: #12140b;        // Near-black organic tone for crisp UI elements
+$background-color: #383f1894;
+$bg-non-transparent: #8b9078;
 
 // Typography colours
 $h2-color: #383f18;           // Deep moss green for majestic serif headings
@@ -19,15 +18,11 @@ $h3-color: #383f18;           // Deep moss green for sub-section headings
 $h5-color: #5a6333;           // Herbal olive for tiny headers and label flags
 
 // Layout colours
-$section-light: #f4f3ed;      // Airy cream canvas for the main sections (Story, Registry)
+$section-light: #44563875;      // Airy cream canvas for the main sections (Story, Registry)
 $section-dark: #383f18;       // Deep moss green for dramatic hero headers or dark sections
-$to-top-bg: #5a6333;          // Herbal olive scroll-to-top button
-$footer-primary: #212415;     // Grounded deep charcoal olive footer base
-$footer-secondary: #1a1c10;   // Subtle deep organic tint for copyright line
 
 // Keylines
 $keyline-color: #d1d5c5;      // Delicate divider line for light layouts
-$footer-keyline-color: #5a6333; // Muted green divider line within the footer
 
 // Header
 $header-color: #383f18E0;
