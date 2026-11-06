@@ -1,47 +1,100 @@
 $(document).ready(function () {
 
-    /***************** Waypoints ******************/
+    /***************** Scroll reveals ******************/
 
-    $('.wp1').waypoint(function () {
-        $('.wp1').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp2').waypoint(function () {
-        $('.wp2').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp3').waypoint(function () {
-        $('.wp3').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp4').waypoint(function () {
-        $('.wp4').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp5').waypoint(function () {
-        $('.wp5').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp6').waypoint(function () {
-        $('.wp6').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp8').waypoint(function () {
-        $('.wp8').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp9').waypoint(function () {
-        $('.wp9').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var sectionImages = document.querySelectorAll('#eng-pics img, #wedding-party img');
+
+    function decodeImage(image) {
+        if (typeof image.decode !== 'function') {
+            return Promise.resolve();
+        }
+
+        return image.decode().catch(function (error) {
+            console.warn('Image decode failed; revealing section content anyway.', image.currentSrc, error);
+        });
+    }
+
+    function waitForImages(element) {
+        var images = Array.from(element.querySelectorAll('img'));
+        return Promise.all(images.map(function (image) {
+            if (image.complete) {
+                return image.naturalWidth ? decodeImage(image) : Promise.resolve();
+            }
+
+            return new Promise(function (resolve) {
+                image.addEventListener('load', function () {
+                    decodeImage(image).then(resolve);
+                }, {once: true});
+                image.addEventListener('error', resolve, {once: true});
+            });
+        }));
+    }
+
+    if ('IntersectionObserver' in window) {
+        var imagePreloadObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.loading = 'eager';
+                    entry.target.fetchPriority = 'auto';
+                    imagePreloadObserver.unobserve(entry.target);
+                }
+            });
+        }, {rootMargin: '800px 0px'});
+
+        sectionImages.forEach(function (image) {
+            imagePreloadObserver.observe(image);
+        });
+    }
+
+    if ('IntersectionObserver' in window && !reducedMotion.matches) {
+        // Animate content groups, not nested controls, overlays, or modal dialogs.
+        var revealSelector = [
+            'body > section:not(.hero) > .container > .row > [class*="col-"]',
+            'body > section:not(.hero) > .container-fluid > .row > [class*="col-"]',
+            '.wedding-party-grid > li',
+            '.schedule-veil',
+            '.travel-hotel',
+            '#map > .text-center',
+            '.map-layout',
+            '#video-content',
+            'footer > .container'
+        ].join(', ');
+        var revealElements = Array.from(document.querySelectorAll(revealSelector)).filter(function (element) {
+            return !element.closest('.modal, [inert]') &&
+                (element.textContent.trim() || element.querySelector('img, #map-canvas'));
+        });
+        var revealObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting || entry.boundingClientRect.bottom < 0) {
+                    revealObserver.unobserve(entry.target);
+                    waitForImages(entry.target).then(function () {
+                        entry.target.classList.add('is-visible');
+                    });
+                }
+            });
+        }, {rootMargin: '0px 0px -6% 0px', threshold: 0});
+
+        revealElements.forEach(function (element) {
+            var index = Array.prototype.indexOf.call(element.parentElement.children, element);
+            element.style.setProperty('--reveal-delay', Math.min(index * 70, 210) + 'ms');
+            element.classList.add('scroll-reveal');
+            revealObserver.observe(element);
+            element.addEventListener('focusin', function () {
+                element.classList.remove('scroll-reveal');
+                revealObserver.unobserve(element);
+            });
+        });
+
+        reducedMotion.addEventListener('change', function (event) {
+            if (event.matches) {
+                revealObserver.disconnect();
+                revealElements.forEach(function (element) {
+                    element.classList.remove('scroll-reveal');
+                });
+            }
+        });
+    }
 
     /***************** Initiate Fancybox ******************/
 
@@ -120,7 +173,25 @@ $(document).ready(function () {
     });
 
     /********************** Embed youtube video *********************/
-    $('.player').YTPlayer();
+    var videoSection = document.getElementById('video-bg');
+    var desktopVideo = window.matchMedia('(min-width: 992px)');
+    var videoInitialized = false;
+
+    function initializeVideoPlayer() {
+        if (!videoSection || videoInitialized || !desktopVideo.matches) {
+            return;
+        }
+
+        videoInitialized = true;
+        $('.player').YTPlayer();
+    }
+
+    desktopVideo.addEventListener('change', function (event) {
+        if (event.matches) {
+            initializeVideoPlayer();
+        }
+    });
+    initializeVideoPlayer();
 
 
     /********************** Toggle Map Content **********************/

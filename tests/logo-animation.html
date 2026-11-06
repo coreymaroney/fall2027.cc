@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Logo animation regression test</title>
+    <link rel="stylesheet" href="../css/styles.min.css">
+  </head>
+  <body>
+    <div class="hero">
+      <div class="hero-content">
+        <img src="../img/logo-lg.svg" alt="Corey &amp; Carina" width="800" height="154">
+        <p class="countdown" id="wedding-countdown">September 11, 2027</p>
+        <div class="hero-actions"><a href="#rsvp">RSVP</a></div>
+      </div>
+    </div>
+    <pre id="results" role="status">Running...</pre>
+    <script src="../js/logo-animation.js"></script>
+    <script>
+      (async function () {
+        const results = document.getElementById('results');
+        const checks = [];
+        function check(condition, message) {
+          if (!condition) throw new Error(message);
+          checks.push('PASS: ' + message);
+        }
+        async function render(text) {
+          const image = new Image();
+          image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text);
+          await image.decode();
+          const canvas = document.createElement('canvas');
+          canvas.width = 3200;
+          canvas.height = 616;
+          const context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          return context.getImageData(0, 0, canvas.width, canvas.height).data;
+        }
+        try {
+          if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            check(!!document.querySelector('.hero-content img'), 'Reduced motion keeps the original image');
+            check(!document.querySelector('.animated-logo'), 'Reduced motion skips animation');
+            check(getComputedStyle(document.querySelector('.countdown')).opacity === '1',
+              'Reduced motion shows countdown immediately');
+            check(getComputedStyle(document.querySelector('.hero-actions')).opacity === '1',
+              'Reduced motion shows RSVP immediately');
+          } else {
+            const svg = await new Promise(function (resolve, reject) {
+              const timeout = setTimeout(function () {
+                observer.disconnect();
+                reject(new Error('Animated logo did not load'));
+              }, 5000);
+              const observer = new MutationObserver(function () {
+                const logo = document.querySelector('.animated-logo');
+                if (logo) {
+                  clearTimeout(timeout);
+                  observer.disconnect();
+                  resolve(logo);
+                }
+              });
+              observer.observe(document.querySelector('.hero-content'), {childList: true});
+            });
+            const animations = svg.getAnimations({subtree: true});
+            animations.forEach(function (animation) { animation.pause(); });
+            const artwork = svg.lastChild.firstChild;
+            check(getComputedStyle(artwork).fill === 'rgb(255, 255, 255)', 'Artwork remains solid white');
+            check(getComputedStyle(artwork).stroke === 'none', 'Artwork has no outline');
+            check(getComputedStyle(svg).opacity === '1', 'Logo does not fade');
+            check(svg.getAttribute('aria-label') === 'Corey & Carina', 'Accessible name is preserved');
+            const original = await render(await (await fetch('../img/logo-lg.svg')).text());
+            let previous = null;
+            let previousInk = 0;
+            for (const time of [0, 1449, 1800, 2600, 3500, 4700, 5500, 6000, 6200]) {
+              animations.forEach(function (animation) { animation.currentTime = time; });
+              const clone = svg.cloneNode(true);
+              const pens = svg.querySelectorAll('.logo-pen');
+              clone.querySelectorAll('.logo-pen').forEach(function (pen, index) {
+                const style = getComputedStyle(pens[index]);
+                pen.setAttribute('style', 'visibility:' + style.visibility +
+                  ';stroke-dasharray:' + style.strokeDasharray +
+                  ';stroke-dashoffset:' + style.strokeDashoffset);
+              });
+              const frame = await render(new XMLSerializer().serializeToString(clone));
+              let ink = 0;
+              let differences = 0;
+              let vanished = 0;
+              for (let i = 3; i < frame.length; i += 4) {
+                if (frame[i] > 128) ink++;
+                if (frame[i] !== original[i]) differences++;
+                if (previous && previous[i] > frame[i] + 1) vanished++;
+              }
+              check(vanished === 0, 'No ink disappears at ' + time + 'ms');
+              if (time < 1450) check(ink === 0, 'No premature strokes at ' + time + 'ms');
+              else if (time < 6000) check(ink > previousInk, 'Solid lettering progresses at ' + time + 'ms');
+              else check(differences === 0, 'Completed logo matches original pixels at ' + time + 'ms');
+              previous = frame;
+              previousInk = ink;
+            }
+            const countdown = document.querySelector('.countdown');
+            const actions = document.querySelector('.hero-actions');
+            const revealDelay = parseFloat(getComputedStyle(svg.closest('.hero'))
+              .getPropertyValue('--hero-reveal-delay')) * 1000;
+            const countdownAnimation = countdown.getAnimations()[0];
+            const actionsAnimation = actions.getAnimations()[0];
+            check(Math.abs(revealDelay - 5650) < 1, 'Content reveal follows logo completion');
+            countdownAnimation.pause();
+            actionsAnimation.pause();
+            countdownAnimation.currentTime = revealDelay - 1;
+            actionsAnimation.currentTime = revealDelay - 1;
+            check(getComputedStyle(countdown).opacity === '0', 'Countdown waits for logo');
+            check(getComputedStyle(actions).opacity === '0', 'RSVP waits for logo');
+            countdownAnimation.currentTime = revealDelay + 450;
+            actionsAnimation.currentTime = revealDelay + 450;
+            const countdownOpacity = parseFloat(getComputedStyle(countdown).opacity);
+            const actionsOpacity = parseFloat(getComputedStyle(actions).opacity);
+            check(countdownOpacity > actionsOpacity && actionsOpacity > 0 && countdownOpacity < 1,
+              'Countdown and RSVP fade in gradually with a stagger');
+            countdownAnimation.currentTime = revealDelay + 1100;
+            actionsAnimation.currentTime = revealDelay + 1100;
+            check(getComputedStyle(countdown).opacity === '1' && getComputedStyle(actions).opacity === '1',
+              'Countdown and RSVP stay visible after animation');
+            actionsAnimation.currentTime = 0;
+            actions.querySelector('a').focus();
+            check(getComputedStyle(actions).opacity === '1', 'Keyboard focus reveals RSVP immediately');
+          }
+          results.textContent = checks.join('\n');
+          results.dataset.status = 'passed';
+        } catch (error) {
+          results.textContent = checks.concat('FAIL: ' + error.message).join('\n');
+          results.dataset.status = 'failed';
+          console.error(error);
+        }
+      })();
+    </script>
+  </body>
+</html>

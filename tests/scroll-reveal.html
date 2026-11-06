@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Scroll reveal regression test</title>
+  </head>
+  <body>
+    <iframe src="../index.html" title="Wedding website" width="1024" height="700"></iframe>
+    <pre id="results" role="status">Running...</pre>
+    <script>
+      const frame = document.querySelector('iframe');
+      if (new URLSearchParams(location.search).has('mobile')) {
+        frame.width = '375';
+      }
+      frame.addEventListener('load', async function () {
+        const results = document.getElementById('results');
+        const checks = [];
+        function check(condition, message) {
+          if (!condition) throw new Error(message);
+          checks.push('PASS: ' + message);
+        }
+        function wait(milliseconds) {
+          return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
+        }
+        try {
+          const doc = frame.contentDocument;
+          const win = frame.contentWindow;
+          check(win.getComputedStyle(doc.body).overflowY === 'visible',
+            'Fade-up overflow does not create a second page scroll container');
+          check(win.getComputedStyle(doc.documentElement).scrollbarWidth === 'none' &&
+            win.getComputedStyle(doc.body).scrollbarWidth === 'none',
+            'Both page scrollbar surfaces are hidden');
+          check(doc.body.clientWidth === doc.documentElement.clientWidth,
+            'Body does not reserve a scrollbar gutter');
+          const groups = Array.from(doc.querySelectorAll('.scroll-reveal'));
+          if (win.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+              !('IntersectionObserver' in win)) {
+            check(groups.length === 0, 'Fallback leaves all groups visible');
+          } else {
+            check(groups.length > 30, 'Content groups across the page are observed');
+            check(!doc.querySelector('.hero .scroll-reveal, .modal .scroll-reveal, [inert] .scroll-reveal'),
+              'Hero, modals, and inert content are excluded');
+            check(win.getComputedStyle(doc.querySelector('.wedding-party-grid li')).opacity === '0',
+              'Offscreen content waits for scrolling');
+            const visibleGroups = groups.filter(function (group) {
+              return group.getClientRects().length > 0;
+            });
+            for (const group of visibleGroups) {
+              group.scrollIntoView({block: 'center', behavior: 'instant'});
+              for (let attempt = 0; attempt < 20 && !group.classList.contains('is-visible'); attempt++) {
+                await new Promise(function (resolve) { win.requestAnimationFrame(resolve); });
+                await wait(50);
+              }
+              check(group.classList.contains('is-visible'),
+                'Scrolled content reveals: ' + (group.textContent.trim().slice(0, 25) || 'photo'));
+              group.getAnimations().forEach(function (animation) { animation.finish(); });
+              check(win.getComputedStyle(group).opacity === '1', 'Revealed content becomes fully opaque');
+            }
+            win.scrollTo(0, 0);
+            await wait(150);
+            check(visibleGroups.every(function (group) { return group.classList.contains('is-visible'); }),
+              'Revealed groups stay visible after scrolling away');
+            const input = doc.getElementById('invite_code');
+            frame.focus();
+            input.focus({preventScroll: true});
+            await wait(50);
+            check(!input.closest('.scroll-reveal'), 'Keyboard focus immediately reveals the RSVP form');
+            check(!Array.from(doc.querySelectorAll('.wp1, .wp2, .wp8, .wp9')).some(function (image) {
+              return win.getComputedStyle(image).visibility === 'hidden';
+            }), 'Legacy directional animations no longer hide story images');
+          }
+          results.textContent = checks.join('\n');
+          results.dataset.status = 'passed';
+        } catch (error) {
+          results.textContent = checks.concat('FAIL: ' + error.message).join('\n');
+          results.dataset.status = 'failed';
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>
